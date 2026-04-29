@@ -1,0 +1,440 @@
+/* =========================
+   GLOBAL
+========================= */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #eef2f7, #f8fafc);
+    color: #222;
+}
+
+/* =========================
+   PAGE LAYOUT
+========================= */
+.page {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 64px 1fr 54px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.top-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+.top-logo {
+    height: 28px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    display: block;
+}
+
+.page-content {
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.bottom-bar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    background: transparent;
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #444;
+    text-decoration: none;
+}
+
+.footer-icon {
+    height: 18px;
+    width: auto;
+    max-width: 28px;
+    object-fit: contain;
+    display: block;
+    opacity: 1;
+}
+
+/* =========================
+   MAIN CARD
+========================= */
+.container {
+    width: 100%;
+    max-width: 900px;
+    max-height: 100%;
+    overflow: auto;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+    padding: 25px 30px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    scrollbar-width: thin;
+    scrollbar-color: #bcc8db transparent;
+}
+
+    .container::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .container::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #cfd8e6, #b8c4d8);
+        border-radius: 10px;
+        border: 2px solid #ffffff;
+    }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #b7c4db, #9fb0cc);
+        }
+
+    .container::-webkit-scrollbar-button {
+        width: 0;
+        height: 0;
+    }
+
+    .container::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+
+    /* =========================
+   TYPOGRAPHY
+========================= */
+    .container h2,
+    .header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .container p,
+    .desc {
+        margin-top: 6px;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+/* =========================
+   TREE
+========================= */
+.tree-root,
+.tree-wrapper {
+    margin-top: 20px;
+}
+
+.tree-item-wrapper {
+    width: 100%;
+}
+
+.tree-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 6px;
+    border-bottom: 1px solid #eee;
+    transition: 0.15s ease;
+}
+
+    .tree-item:hover {
+        background: #f9fbff;
+    }
+
+.tree-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    min-width: 0;
+    flex: 1;
+}
+
+.tree-name {
+    word-break: break-word;
+}
+
+.folder {
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.children {
+    margin-left: 30px;
+    border-left: 2px solid #eee;
+    padding-left: 12px;
+}
+
+.empty {
+    color: #777;
+    font-size: 14px;
+    padding: 10px 0;
+}
+
+/* =========================
+   FILE ACTIONS
+========================= */
+.file-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: 12px;
+}
+
+.preview-btn,
+.download-btn {
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: 0.15s ease;
+}
+
+    .preview-btn:hover,
+    .download-btn:hover {
+        background: rgba(0, 150, 255, 0.1);
+        color: #0096ff;
+    }
+
+/* =========================
+   CENTER STATES
+========================= */
+.center {
+    height: 100%;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #555;
+    text-align: center;
+    gap: 12px;
+}
+
+.error {
+    color: #c0392b;
+}
+
+    .error h3 {
+        margin: 0;
+    }
+
+/* =========================
+   LOADER
+========================= */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #eee;
+    border-top: 4px solid #2d7ef7;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+/* =========================
+   FOLDER LOADING
+========================= */
+.folder-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    color: #666;
+    font-size: 13px;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.mini-loader {
+    width: 16px;
+    height: 16px;
+    border: 3px solid #ddd;
+    border-top: 3px solid #2d7ef7;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* =========================
+   PASSWORD SCREEN
+========================= */
+.center input[type="password"],
+.password-input {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px 14px;
+    border: 1px solid #d9dee7;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+    .center input[type="password"]:focus,
+    .password-input:focus {
+        border-color: #2d7ef7;
+        box-shadow: 0 0 0 3px rgba(45, 126, 247, 0.12);
+    }
+
+.center button,
+.password-submit,
+button {
+    border: none;
+    background: #2d7ef7;
+    color: white;
+    padding: 12px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+    .center button:hover,
+    .password-submit:hover,
+    button:hover {
+        background: #1a66d9;
+    }
+
+.password-error {
+    margin-top: 12px;
+    color: #c0392b;
+    font-size: 13px;
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================
+   TABLET / PHONE
+========================= */
+@media (max-width: 768px) {
+    .page {
+        grid-template-rows: 60px 1fr 56px;
+    }
+
+    .top-bar {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .bottom-bar {
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .top-logo {
+        height: 24px;
+        max-width: 180px;
+    }
+
+    .footer-brand {
+        color: #222;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .footer-icon {
+        height: 16px;
+        max-width: 24px;
+    }
+
+    .page-content {
+        padding: 12px;
+    }
+
+    .container {
+        padding: 20px 16px;
+        border-radius: 0;
+        max-width: 100%;
+    }
+
+        .container h2,
+        .header h2 {
+            font-size: 20px;
+        }
+
+    .tree-item {
+        padding: 12px 4px;
+    }
+
+    .children {
+        margin-left: 18px;
+        padding-left: 10px;
+    }
+
+    .file-actions {
+        gap: 4px;
+        margin-left: 8px;
+    }
+
+    .preview-btn,
+    .download-btn {
+        padding: 6px;
+        font-size: 13px;
+    }
+
+    .center input[type="password"],
+    .password-input {
+        max-width: 100%;
+    }
+}
