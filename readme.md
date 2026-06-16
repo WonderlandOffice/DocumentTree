@@ -30,8 +30,9 @@ This version is built with **plain HTML, CSS, and JavaScript**, making it ideal 
 DocumentTree.Plain/
 │
 ├── index.html        Markup shell (top bar, container, footer)
-├── styles.css        All look & feel — change me freely
-├── app.js            Fetches the tree, renders it, owns all behaviour
+├── config.js         Your ".env" — set apiBase + default token here
+├── documentTree.css  All look & feel — change me freely
+├── documentTree.js   Fetches the tree, renders it, owns all behaviour
 └── media/
     ├── DocumentTree_Black_Small.png
     ├── Wo_icon.png
@@ -58,14 +59,14 @@ By default Plain talks to the API that hosts the page (`window.location.origin`)
 
 ```html
 <script>window.DOCUMENTTREE_API_BASE = "https://my-api.example.com/SourceLinks";</script>
-<script src="app.js"></script>
+<script src="documentTree.js"></script>
 ```
 
 ---
 
 ## 🎨 Customising the design
 
-All visuals live in `styles.css`. The file is plain CSS — no preprocessor, no framework — so you can override any rule directly.
+All visuals live in `documentTree.css`. The file is plain CSS — no preprocessor, no framework — so you can override any rule directly.
 
 ### Where to start
 
@@ -88,7 +89,7 @@ All visuals live in `styles.css`. The file is plain CSS — no preprocessor, no 
 
 ### Drop in your brand colour
 
-Edit the design tokens at the top of `styles.css`:
+Edit the design tokens at the top of `documentTree.css`:
 
 ```css
 :root {
@@ -305,7 +306,7 @@ Plain ships a real mobile layout (not just a shrink of the desktop):
 
 ## 🧱 Building your own UI on top
 
-`app.js` is intentionally compact (~600 lines) and uses no framework. To wire the API into your own markup:
+`documentTree.js` is intentionally compact (~600 lines) and uses no framework. To wire the API into your own markup:
 
 1. Parse the token: `new URLSearchParams(window.location.search).get("token")`.
 2. Call `publicLink` and render the root items.

@@ -6,6 +6,7 @@
     --bg-0:           #f5f7fb;
     --bg-1:           #eef2ff;
     --card-bg:        rgba(255, 255, 255, 0.78);
+    --menu-bg:        rgba(255, 255, 255, 0.94);
     --card-border:    rgba(255, 255, 255, 0.65);
     --card-shadow:    0 20px 60px -20px rgba(31, 41, 80, 0.18),
                       0 8px 24px -12px rgba(31, 41, 80, 0.08);
@@ -37,6 +38,29 @@
     --ease:           cubic-bezier(0.2, 0.8, 0.2, 1);
 
     color-scheme: light;
+}
+
+/* Dark theme is class-driven (html.theme-dark), resolved in JS from the link's
+   Theme setting: DARK forces it, LIGHT forces it off, SYSTEM follows the OS via
+   matchMedia. This lets a single link pin its own theme regardless of the OS. */
+html.theme-dark {
+    --bg-0:           #0b0f1a;
+    --bg-1:           #12172a;
+    --card-bg:        rgba(22, 27, 41, 0.78);
+    --menu-bg:        rgba(22, 27, 41, 0.95);
+    --card-border:    rgba(255, 255, 255, 0.08);
+    --card-shadow:    0 24px 70px -20px rgba(0, 0, 0, 0.6),
+                      0 10px 28px -12px rgba(0, 0, 0, 0.45);
+    --text:           #e2e8f0;
+    --text-soft:      #b6bdcc;
+    --muted:          #8b93a7;
+    --line:           rgba(255, 255, 255, 0.06);
+    --line-strong:    rgba(255, 255, 255, 0.12);
+    --surface-input:  rgba(17, 22, 36, 0.85);
+    --surface-raised: rgba(30, 36, 54, 0.7);
+    --surface-hover:  rgba(99, 102, 241, 0.12);
+    --top-bar-bg:     rgba(11, 15, 26, 0.65);
+    color-scheme: dark;
 }
 
 /* =========================
@@ -119,6 +143,8 @@ body::after {
     filter: brightness(1);
     display: block;
 }
+html.theme-dark .top-logo,
+html.theme-dark .footer-icon { filter: invert(1); }
 
 .top-actions {
     margin-left: auto;
@@ -126,41 +152,40 @@ body::after {
     align-items: center;
     gap: 8px;
 }
+/* When the language switcher is moved into the card header (placement TOP) it
+   sits right after the search + select icons, so drop the auto margin that
+   would otherwise shove it to the far edge. */
+.header-main #lang-switcher.header-lang { margin-left: 0; }
 
 /* =========================
    LANGUAGE SWITCHER
 ========================= */
 .lang-wrap { position: relative; }
 
-.icon-btn.lang {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface-raised);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 6px 10px;
-    font: inherit;
-    font-size: 13px;
-    border-radius: 999px;
+/* Simple round icon buttons — search toggle, language switcher and Select all
+   share the exact same look so they read as 3 clean icons side by side. */
+.icon-btn.lang,
+.bar-icon-btn {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
     cursor: pointer;
+    padding: 0;
     transition: all 0.15s var(--ease);
 }
-.icon-btn.lang:hover {
+.icon-btn.lang:hover,
+.icon-btn.lang[aria-expanded="true"],
+.bar-icon-btn:hover {
     background: var(--surface-hover);
     border-color: var(--accent-ring);
     color: var(--accent);
 }
-.icon-btn.lang .flag {
-    font-size: 14px;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-}
-.icon-btn.lang .flag svg { width: 14px; height: 14px; }
-.icon-btn.lang .code { font-weight: 600; }
-.icon-btn.lang .chevron { display: inline-flex; align-items: center; }
-.icon-btn.lang .chevron svg { width: 10px; height: 10px; }
+.icon-btn.lang svg,
+.bar-icon-btn svg { width: 16px; height: 16px; }
 
 .lang-menu {
     position: absolute;
@@ -168,7 +193,11 @@ body::after {
     right: 0;
     min-width: 180px;
     padding: 6px;
+    /* Frosted liquid glass: semi-transparent fill + backdrop blur so the menu
+       reads as glass instead of just see-through. */
     background: var(--menu-bg, var(--card-bg));
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-md);
     box-shadow: var(--card-shadow);
@@ -278,7 +307,9 @@ body::after {
     top: 0;
     z-index: 5;
     margin: 0 -36px;
-    padding: 22px 36px 16px;
+    /* Compact from the start — DocumentTree is often embedded, so the header
+       must not resize on scroll (would cause a layout jump in the host page). */
+    padding: 12px 36px;
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.05) 70%),
         rgba(255, 255, 255, 0.35);
@@ -293,16 +324,36 @@ body::after {
                 border-color 0.25s var(--ease);
 }
 
-/* Compact variant + visible separator once the content scrolls past the header */
+/* On desktop, give the header a bit more breathing room above the title for
+   standalone viewers and for embedded links in the standard (tree) view.
+   Embedded gallery links stay compact so they don't push the host's layout. */
+@media (min-width: 769px) {
+    body:not(.embedded-mode) .header { padding-top: 22px; }
+    body.embedded-mode.view-default .header { padding-top: 22px; }
+}
+
+/* On scroll: only a soft shadow — no border line, no size change. */
 .container.scrolled .header {
-    padding: 10px 36px;
-    border-bottom-color: rgba(255, 255, 255, 0.35);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.7),
         0 10px 30px -14px rgba(15, 23, 42, 0.2);
 }
-.container.scrolled .header-text h2 { font-size: 16px; }
-.container.scrolled .header-text .desc { display: none; }
+
+html.theme-dark .header {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 70%),
+        rgba(20, 25, 40, 0.55);
+    border-bottom-color: transparent;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 0 0 rgba(0, 0, 0, 0);
+}
+html.theme-dark .container.scrolled .header {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 10px 30px -14px rgba(0, 0, 0, 0.55);
+}
+/* No scroll-driven title shrink / description hide — keeps the header stable. */
 
 .header-main {
     display: flex;
@@ -316,14 +367,13 @@ body::after {
 }
 .header-text h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: var(--title-size, 21px);
     font-weight: 700;
-    transition: font-size 0.2s var(--ease);
     letter-spacing: -0.01em;
 }
 .header-text .desc {
     margin: 4px 0 0;
-    font-size: 13px;
+    font-size: var(--desc-size, 13px);
     color: var(--muted);
 }
 
@@ -365,6 +415,77 @@ body::after {
 .header-search-input:focus {
     border-color: var(--accent-ring);
     box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* When the title + description are both hidden, the header isn't rendered.
+   The search controls are then drawn inside the bottom action bar instead. */
+#app.no-header .tree-wrapper { padding-top: 12px; }
+
+/* Right-side cluster inside the action bar: only the wrapper carries
+   margin-left: auto, so the search input + lang switcher stay glued together
+   on the right edge instead of fighting each other for the gap. */
+.container-actions .actions-right {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.container-actions.has-search .header-search-toggle {
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s var(--ease);
+}
+.container-actions.has-search .header-search-toggle:hover,
+.container-actions.has-search .header-search-toggle.active {
+    background: var(--surface-hover);
+    border-color: var(--accent-ring);
+    color: var(--accent);
+}
+.container-actions.has-search .header-search-toggle svg { width: 15px; height: 15px; }
+
+/* Match the lang + Select icon buttons to the bottom-bar search toggle size
+   so the three icons line up identically in the action bar. */
+.container-actions .icon-btn.lang,
+.container-actions .bar-icon-btn { width: 34px; height: 34px; }
+.container-actions .icon-btn.lang svg,
+.container-actions .bar-icon-btn svg { width: 15px; height: 15px; }
+
+.container-actions.has-search .header-search-input {
+    display: none;
+    flex: 1;
+    min-width: 0;
+    width: 220px;
+    max-width: 320px;
+    height: 32px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface-input);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    outline: none;
+}
+.container-actions.search-open .header-search-input { display: inline-block; }
+.container-actions.has-search .header-search-input:focus {
+    border-color: var(--accent-ring);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* The lang switcher used to push itself right with margin-left: auto. Now
+   it lives inside .actions-right (which already handles right alignment),
+   so the auto isn't needed there. */
+.container-actions .actions-right #lang-switcher.embedded-lang {
+    margin-left: 0;
 }
 
 /* =========================
@@ -470,12 +591,434 @@ body::after {
 
 .tree-left:hover .tree-icon { transform: scale(1.06); }
 
+.thumbnail-shell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: hidden;
+    background: var(--surface-hover);
+}
+
+.thumbnail-loader {
+    position: absolute;
+    inset: 5px;
+    width: 14px;
+    height: 14px;
+    margin: auto;
+    border-radius: 50%;
+    border: 2px solid var(--line-strong);
+    border-top-color: var(--accent);
+    animation: thumbnailSpin 0.75s linear infinite;
+}
+
+@keyframes thumbnailSpin {
+    to { transform: rotate(360deg); }
+}
+
 .tree-thumbnail {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
     background: var(--surface-hover);
+    cursor: zoom-in;
+    opacity: 0;
+    transition: opacity 0.18s var(--ease);
+}
+
+.thumbnail-shell.is-loaded .tree-thumbnail { opacity: 1; }
+.thumbnail-shell.is-loaded .thumbnail-loader { display: none; }
+.thumbnail-shell.is-error .tree-thumbnail { opacity: 0.35; }
+
+/* =========================
+   IMAGE LIGHTBOX
+========================= */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2vmin;
+    cursor: zoom-out;
+    animation: lightboxIn 0.2s var(--ease);
+}
+@keyframes lightboxIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.lightbox-image {
+    max-width: 96vw;
+    max-height: 96vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    transition: opacity 0.18s var(--ease);
+}
+/* During progressive loading we want the (low-quality) thumbnail visible —
+   only the spinner indicates that a sharper version is still on its way. */
+.lightbox-overlay.is-error .lightbox-image {
+    opacity: 0;
+}
+
+/* Spinner shown while the full-resolution preview is downloading. */
+.lightbox-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 48px;
+    height: 48px;
+    margin: -24px 0 0 -24px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: rgba(255, 255, 255, 0.9);
+    animation: spin 0.85s linear infinite;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s var(--ease);
+}
+.lightbox-overlay.is-loading .lightbox-loader { opacity: 1; }
+
+.lightbox-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s var(--ease);
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox-close svg { width: 16px; height: 16px; }
+
+/* Prev / next arrows + counter for multi-image lightbox navigation. */
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s var(--ease);
+    z-index: 1;
+}
+.lightbox-nav:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox-nav svg { width: 20px; height: 20px; }
+.lightbox-prev { left: 16px; transform: translateY(-50%) rotate(180deg); }
+.lightbox-next { right: 16px; }
+
+.lightbox-counter {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.45);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    pointer-events: none;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+@media (max-width: 768px) {
+    .lightbox-nav { width: 40px; height: 40px; }
+    .lightbox-prev { left: 8px; }
+    .lightbox-next { right: 8px; }
+}
+
+/* =========================
+   EMBEDDED MODE
+   Strips top + bottom chrome (logo + footer) and lets the content fill the
+   whole viewport, so the viewer can be dropped into an <iframe> on another
+   site without competing with the host's branding.
+========================= */
+body.embedded-mode .top-bar,
+body.embedded-mode .bottom-bar { display: none; }
+
+body.embedded-mode .page {
+    grid-template-rows: 1fr;
+}
+
+body.embedded-mode .page-content {
+    padding: 0;
+}
+
+body.embedded-mode .container {
+    max-width: 100%;
+    max-height: 100vh;
+    max-height: 100dvh;
+    max-height: var(--app-vh, 100dvh);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+}
+
+/* The background colour blobs add brand bloom — also drop them in embed mode. */
+body.embedded-mode::before,
+body.embedded-mode::after { display: none; }
+
+/* In embedded mode the top-bar is hidden, so the language switcher is moved
+   (via JS) into the bottom action bar — to the right of the Select button.
+   It pushes itself right and pops its menu upward so it stays in view. */
+.container-actions #lang-switcher.embedded-lang {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.container-actions #lang-switcher.embedded-lang .lang-menu {
+    top: auto;
+    bottom: calc(100% + 6px);
+    right: 0;
+    transform-origin: bottom right;
+}
+
+/* =========================
+   GALLERY VIEW
+   Rounded tiles in a responsive grid. Picked when the SourceLink's ViewType
+   is "GALLERY" — same data, photo-album-style layout. Folders open into a
+   new gallery page (breadcrumb above) so the navigation stays familiar.
+========================= */
+.gallery-mode { padding-top: 8px; }
+
+.gallery-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 13px;
+    margin: 0 0 14px;
+    color: var(--muted);
+}
+.gallery-crumb {
+    background: none;
+    border: none;
+    font: inherit;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+}
+.gallery-crumb:hover { background: var(--surface-hover); }
+.gallery-crumb.current { color: var(--text); cursor: default; }
+.gallery-crumb.current:hover { background: transparent; }
+.gallery-crumb-sep { color: var(--muted); }
+
+.gallery-grid {
+    display: grid;
+    /* --user-gallery-size is set inline by renderGallery from the link's
+       configured tile size. The media query below scales it down for small
+       viewports so tiles stay proportional. */
+    grid-template-columns: repeat(auto-fill, minmax(var(--user-gallery-size, 180px), 1fr));
+    gap: 14px;
+    padding-bottom: 24px;
+}
+
+.gallery-tile-wrapper {
+    position: relative;
+    min-width: 0;
+    animation: tileIn 0.32s var(--ease) both;
+}
+@keyframes tileIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.gallery-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    user-select: none;
+}
+.gallery-tile:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-ring);
+    box-shadow: 0 16px 32px -18px rgba(15, 23, 42, 0.25);
+}
+.gallery-tile-wrapper.selected .gallery-tile {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.gallery-visual {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, var(--surface-hover), rgba(99, 102, 241, 0.05));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.gallery-visual .thumbnail-shell,
+.gallery-visual .gallery-thumb,
+.gallery-visual .gallery-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.gallery-folder-icon {
+    width: 60%;
+    height: 60%;
+    color: var(--folder);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.gallery-folder-icon svg { width: 100%; height: 100%; }
+.gallery-doc-icon {
+    width: 64%;
+    height: 64%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.gallery-doc-icon svg { width: 100%; height: 100%; }
+.gallery-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 28px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+    transition: opacity 0.18s var(--ease);
+}
+/* While the media plays, fade the static play icon out so the native controls
+   take over visually. The CSS class is toggled by JS on play/pause/ended. */
+.gallery-tile.is-playing .gallery-play { opacity: 0; }
+
+/* Audio tiles overlay a translucent play icon on top of the file-type icon
+   and stack the native audio controls under it. */
+.gallery-audio {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: calc(100% - 16px);
+    height: 32px;
+}
+.gallery-tile.is-audio .gallery-doc-icon {
+    opacity: 0.55;
+}
+
+/* Native media controls — keep them visible above any tile shadow. */
+.gallery-video::-webkit-media-controls-panel,
+.gallery-audio::-webkit-media-controls-panel {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.1));
+}
+
+.gallery-caption {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    min-width: 0;
+    max-width: 100%;
+    text-align: center;
+}
+/* The primary line (name) — one line max, ellipsis. The full filename lives
+   in the `title` attribute so hovering reveals it. */
+.gallery-caption-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    max-width: 100%;
+}
+.gallery-tile.is-folder .gallery-caption-name {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Breadcrumb path shown under a tile when it is part of search results. */
+.gallery-caption-path {
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The check is only rendered while selection mode is active (see renderGalleryTile),
+   so the base style just positions and paints it; no show/hide toggle needed. */
+.gallery-check {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    z-index: 2;
+}
+.gallery-check svg { width: 18px; height: 18px; }
+.gallery-tile-wrapper.selected .gallery-check { color: var(--accent); border-color: var(--accent); }
+
+/* Mobile tweaks */
+@media (max-width: 768px) {
+    .gallery-tile { border-radius: 14px; }
+    .gallery-caption { padding: 0 8px 10px; font-size: 12px; }
+    .gallery-check { top: 6px; left: 6px; width: 26px; height: 26px; }
+}
+
+/* Small viewports (phone, narrow embed iframes) — scale tiles proportional
+   to the user's configured size, capped so they never get tiny. */
+@media (max-width: 700px), (max-height: 700px) {
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(max(50px, calc(var(--user-gallery-size, 180px) * 0.6)), 1fr));
+        gap: 10px;
+    }
 }
 
 .tree-name {
@@ -513,12 +1056,14 @@ body::after {
     display: inline-flex;
     gap: 4px;
     flex-shrink: 0;
-    opacity: 0.6;
+    opacity: 0;
+    pointer-events: none;
     transition: opacity 0.15s var(--ease);
 }
-.tree-item:hover .file-actions { opacity: 1; }
+.tree-item:hover .file-actions,
+.tree-item:focus-within .file-actions { opacity: 1; pointer-events: auto; }
 
-.preview-btn, .download-btn {
+.preview-btn, .download-btn, .share-btn {
     background: transparent;
     border: 1px solid transparent;
     color: var(--muted);
@@ -528,12 +1073,20 @@ body::after {
     display: inline-flex; align-items: center; justify-content: center;
     transition: all 0.15s var(--ease);
 }
-.preview-btn:hover, .download-btn:hover {
+.preview-btn:hover, .download-btn:hover, .share-btn:hover {
     background: var(--accent-soft);
     border-color: var(--accent-ring);
     color: var(--accent);
 }
-.preview-btn svg, .download-btn svg { width: 14px; height: 14px; }
+.preview-btn svg, .download-btn svg, .share-btn svg { width: 14px; height: 14px; }
+.share-btn.copied {
+    background: var(--accent-soft);
+    border-color: var(--accent-ring);
+    color: var(--accent);
+}
+
+/* Slide-down action panel — mobile only (display:none everywhere else). */
+.tree-actions-panel { display: none; }
 
 /* =========================
    SELECTION CHECKBOX
@@ -579,6 +1132,10 @@ body::after {
 .sel-count,
 .sel-actions { min-width: 0; }
 
+/* Selection toolbar hosted in the card header (Select placement = TOP): the
+   sel-* pieces are self-contained, just match the bottom bar's tighter gap. */
+.header.selection-mode .header-main { gap: 10px; }
+
 /* Liquid-glass effect when there is content underneath the action bar */
 .container.has-overflow-bottom .container-actions {
     background:
@@ -591,6 +1148,17 @@ body::after {
         inset 0 -1px 0 rgba(255, 255, 255, 0.5),
         inset 0 0 0 1px rgba(255, 255, 255, 0.08),
         0 -8px 24px -12px rgba(15, 23, 42, 0.18);
+}
+
+html.theme-dark .container.has-overflow-bottom .container-actions {
+    background:
+        linear-gradient(0deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%),
+        var(--top-bar-bg);
+    border-top-color: rgba(255, 255, 255, 0.06);
+    box-shadow:
+        inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 -10px 30px -12px rgba(0, 0, 0, 0.55);
 }
 
 .container-action-btn {
@@ -609,6 +1177,9 @@ body::after {
     opacity: 0.7;
 }
 .container-action-btn svg { width: 14px; height: 14px; }
+/* Select button when placed in the top header zone — it's an icon-only
+   .bar-icon-btn now, so it already matches the search + lang icons. */
+.header-select-btn { flex-shrink: 0; }
 .container-action-btn:hover {
     opacity: 1;
     background: var(--surface-hover);
@@ -675,7 +1246,19 @@ body::after {
 /* =========================
    SEARCH RESULTS
 ========================= */
-.search-results { display: flex; flex-direction: column; gap: 2px; padding: 4px 0; }
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.search-result-wrapper {
+    max-width: 100%;
+    min-width: 0;
+}
 
 .search-result {
     display: flex;
@@ -684,6 +1267,9 @@ body::after {
     padding: 10px 12px;
     border-radius: var(--radius-sm);
     transition: background 0.15s var(--ease);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 .search-result:hover { background: var(--surface-hover); }
 
@@ -833,11 +1419,9 @@ body::after {
         border-left: none; border-right: none;
     }
 
-    .header { margin: 0 -22px 0 -14px; padding: 18px 22px 12px 14px; }
-    .container.scrolled .header { padding: 8px 22px 8px 14px; }
-    .container.scrolled .header-text h2 { font-size: 14px; }
+    .header { margin: 0 -22px 0 -14px; padding: 10px 22px 10px 14px; }
     .header-text { flex: 1; min-width: 0; }
-    .header-text h2 { font-size: 18px; }
+    .header-text h2 { font-size: calc(var(--title-size, 21px) * 0.72); }
     .header-search-toggle { width: 30px; height: 30px; flex-shrink: 0; }
     .header-search-toggle svg { width: 14px; height: 14px; }
     .header.search-open .header-text { display: none; }
@@ -859,28 +1443,95 @@ body::after {
         word-break: break-word;
         line-height: 1.3;
     }
-    .file-actions { opacity: 1; gap: 2px; margin-top: 2px; }
-    .preview-btn, .download-btn { padding: 5px; }
-    .preview-btn svg, .download-btn svg { width: 12px; height: 12px; }
+    /* Mobile: hide the inline icons completely; tap a row to reveal the panel below. */
+    .file-actions,
+    .search-result-actions { display: none; }
+
+    .tree-left:not(.folder),
+    .search-result { cursor: pointer; }
+
+    .search-result {
+        padding: 8px 6px;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    .search-result-icon { margin-top: 2px; flex-shrink: 0; }
+    .search-result-name,
+    .search-result-path {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+
+    .tree-actions-panel {
+        display: flex;
+        gap: 8px;
+        margin: 0 6px;
+        padding: 0 4px;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.25s var(--ease),
+                    opacity 0.2s var(--ease),
+                    padding 0.2s var(--ease),
+                    margin-bottom 0.2s var(--ease);
+    }
+    .tree-item-wrapper.actions-open > .tree-actions-panel,
+    .search-result-wrapper.actions-open > .tree-actions-panel {
+        max-height: 64px;
+        opacity: 1;
+        padding: 6px 4px 10px;
+        margin-bottom: 4px;
+    }
+    .tree-actions-panel .preview-btn,
+    .tree-actions-panel .download-btn,
+    .tree-actions-panel .share-btn {
+        flex: 1;
+        padding: 9px 12px;
+        background: var(--surface-raised);
+        border: 1px solid var(--line-strong);
+        color: var(--text);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        gap: 8px;
+    }
+    .tree-actions-panel .preview-btn:active,
+    .tree-actions-panel .download-btn:active,
+    .tree-actions-panel .share-btn:active,
+    .tree-actions-panel .share-btn.copied {
+        background: var(--accent-soft);
+        border-color: var(--accent-ring);
+        color: var(--accent);
+    }
+    .tree-actions-panel .preview-btn svg,
+    .tree-actions-panel .download-btn svg,
+    .tree-actions-panel .share-btn svg { width: 14px; height: 14px; }
+
     .children { margin-left: 10px; padding-left: 8px; }
 
     .container-actions { margin: auto -22px 0 -14px; padding: 8px 18px 12px 14px; justify-content: flex-start; }
-    .container-actions.selection-mode {
-        padding: 8px 18px 8px 14px;
-        gap: 6px;
+    /* Selection toolbar (bottom bar OR card header when Select=TOP) spans the
+       full screen width on a single row — labels collapse to icons so it fits. */
+    .container-actions.selection-mode,
+    .header.selection-mode .header-main {
+        gap: 8px;
         width: 100%;
         max-width: 100%;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         justify-content: flex-start;
     }
+    .container-actions.selection-mode { padding: 8px 18px 8px 14px; }
     .sel-count           { font-size: 12px; }
-    .sel-btn             { padding: 6px 8px; font-size: 11px; gap: 4px; flex-shrink: 0; }
-    .sel-btn svg         { width: 12px; height: 12px; }
+    .sel-btn             { padding: 7px 9px; font-size: 11px; gap: 4px; flex-shrink: 0; }
+    .sel-btn svg         { width: 14px; height: 14px; }
+    .sel-btn-label       { display: none; }   /* icon-only to keep one row */
     .sel-actions         {
-        gap: 4px;
-        flex-wrap: wrap;
-        margin-left: 0;
+        gap: 6px;
+        flex-wrap: nowrap;
+        margin-left: auto;
         min-width: 0;
+        flex-shrink: 0;
     }
     .sel-cancel          { padding: 5px; flex-shrink: 0; }
     .sel-cancel svg      { width: 14px; height: 14px; }
@@ -893,4 +1544,3 @@ body::after {
     .footer-brand        { font-size: 12px; min-width: 0; max-width: 100%; }
     .footer-brand span   { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
-
